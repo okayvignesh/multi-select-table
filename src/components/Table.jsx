@@ -313,7 +313,7 @@ function Table() {
                               <div className='gap-div'></div>
                               <tr>
                                 <td style={{ width: "30%" }}>[ALL]</td>
-                                <td style={{ width: "30%" }}>[ALL]</td>
+                                <td style={{ width: "40%" }}>[ALL]</td>
                                 <td style={{ width: "30%" }} className='td-parent'>
                                   {
                                     bagStatuses.map((item) => (
