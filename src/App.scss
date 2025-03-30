@@ -1,0 +1,272 @@
+.dropdown,
+select {
+    outline: none;
+    box-shadow: none !important;
+
+    .dropdown-menu {
+        padding: 0 !important;
+        width: 100%;
+
+        .dropdown-item {
+            padding: 10px !important;
+        }
+    }
+}
+
+p {
+    margin: 5px !important;
+}
+
+.form-select:focus {
+    box-shadow: none !important;
+    border-color: #007bff;
+}
+
+.dropdown-item.selected {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #006ee3 !important;
+    color: white !important;
+    cursor: pointer;
+}
+
+
+.header {
+    padding: 15px;
+    background-color: #f4f4f4;
+    border: 1px solid #e1e1e1;
+}
+
+body {
+    padding: 0;
+}
+
+.table-container {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid #ddd;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+}
+
+.bottom-table {
+    height: 70vh;
+    overflow: scroll;
+}
+
+.sticky-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.sticky-table th,
+.sticky-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.sticky-table thead tr {
+    background-color: #f2f2f2;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: #f2f2f2;
+    z-index: 2;
+}
+
+.sticky-col {
+    position: sticky;
+    background-color: white;
+    z-index: 1;
+}
+
+.sticky-col-1 {
+    left: 0;
+}
+
+.sticky-col-2 {
+    left: 120px;
+}
+
+.sticky-col-3 {
+    left: 240px;
+}
+
+
+
+.table-container {
+    padding: 20px;
+    display: flex;
+    border: none;
+    font-size: 14px;
+    gap: 10px;
+    overflow-x: hidden;
+
+
+    .right-table {
+        overflow-x: scroll;
+        display: flex;
+        gap: 10px;
+
+        .right-parent-th {
+            display: flex;
+            width: 100%;
+            padding: 0 !important;
+
+            &:last-child {
+                .right-th-body {
+                    border-bottom: none !important;
+                }
+            }
+
+            .right-th {
+                border-right: 1px solid black !important;
+                padding: 3px 5px !important;
+
+                &:last-child {
+                    border-right: none !important;
+                }
+            }
+
+            .right-th-body {
+                border-right: 1px solid black !important;
+                border-bottom: 1px solid black !important;
+                padding: 3px 5px !important;
+
+                &:last-child {
+                    border-right: none !important;
+                }
+            }
+        }
+    }
+
+    tr,
+    th,
+    td {
+        border: 1px solid black;
+        padding: 3px 5px !important;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+
+
+    .td-parent {
+        padding: 0 !important;
+
+        .td-div {
+            width: 100%;
+            padding: 3px 5px;
+            border-bottom: 1px solid black;
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+.yellow {
+    th {
+        background-color: #FFFF84 !important;
+        color: black;
+        font-weight: normal !important;
+    }
+}
+
+.blue {
+    th {
+        background-color: #006ee3 !important;
+        color: white !important;
+        font-weight: normal !important;
+    }
+}
+
+.powder-blue {
+    background-color: #84bfff;
+    font-weight: 500;
+}
+
+.powder-green {
+    background-color: #b2ffbf;
+    font-weight: 500;
+}
+
+::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #9c9c9c;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.gap-div {
+    height: 10px;
+}
+
+.main {
+    overflow-x: hidden;
+}
+
+
+.top-table {
+    .right-table {
+        .blue {
+            border: 1px solid black;
+        }
+    }
+}
+
+.applybtn {
+    background-color: #00438a;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#button-tooltip {
+    ul {
+        margin: 0;
+
+        li {
+            text-align: start !important;
+
+        }
+    }
+}
+
+.text-all,
+.text-multiple {
+    color: #006ee3;
+}
+
+
+.nothing{
+    height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
