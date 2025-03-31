@@ -1,11 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import MultiSelect from './MultiDropdown';
 import { countries, waysToBuy, tableData, formatDate, bagStatuses } from '../data';
-import { Tooltip, OverlayTrigger } from 'react-bootstrap';
-import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
-import { FaRegFilePdf } from "react-icons/fa";
-import { TbDelta } from "react-icons/tb";
-import { MdOutlineDifference } from "react-icons/md";
+import { Tooltip } from 'react-bootstrap';
+import Header from './Header';
+import BottomTable from './BottomTable';
+import TopTable from './TopTable';
 
 function Table() {
   const [filter1, setFilter1] = useState([]);
@@ -166,352 +164,45 @@ function Table() {
     }
   };
 
+  const exportToExcel = async () => {
+
+  };
+  
+  console.log(filteredData)
+
   return (
     <div className='main'>
-      <div className="mb-3 header">
-        <div className='d-flex column-gap-3 align-items-end w-100'>
-          <div className="header-section">
-            <p>Country</p>
-            <MultiSelect
-              options={countries}
-              selectedValues={filter1}
-              onChange={setFilter1}
-              placeholder="Select Country"
-            />
-          </div>
-          <div className="header-section">
-            <p>Ways to Buy</p>
-            <MultiSelect
-              options={waysToBuy}
-              selectedValues={filter3}
-              onChange={setFilter3}
-              placeholder="Select ways to buy"
-            />
-          </div>
-          <div className="header-section">
-            <p>As of Date</p>
-            <select className="form-select" onChange={(e) => setFilter2(e.target.value)}>
-              {
-                dateOptions && dateOptions.map((i, index) => {
-                  return (
-                    <option key={index} value={i.value}>{i.label}</option>
-                  )
-                })
-              }
-            </select>
-          </div>
-          <button className="applybtn" onClick={handleApply}>Apply</button>
-        </div>
-        <div className='d-flex my-2 column-gap-2'>
-          <button className={`clearbtn ${showDiff && 'active'}`} onClick={() => setShowDiff(!showDiff)}>
-            <MdOutlineDifference size={25} color='#00438a' />
-          </button>
-          <button className='clearbtn'>
-            <PiMicrosoftExcelLogoFill size={25} color='#00438a' />
-          </button>
-          <button className='clearbtn'>
-            <FaRegFilePdf size={20} color='#00438a' />
-          </button>
-        </div>
-      </div>
+      <Header countries={countries}
+        filter1={filter1}
+        filter3={filter3}
+        setFilter1={setFilter1}
+        setFilter2={setFilter2}
+        setFilter3={setFilter3}
+        waysToBuy={waysToBuy}
+        showDiff={showDiff}
+        exportToExcel={exportToExcel}
+        dateOptions={dateOptions}
+        handleApply={handleApply}
+        setShowDiff={setShowDiff} />
       {
         appliedFilters.filter1.length && appliedFilters.filter3.length ?
           (
             <>
-              <div className="table-container top-table pb-0">
-                <div className="col-5 left-parent">
-                  <table className="table table-bordered left-table">
-                    <thead>
-                      <tr>
-                        <th style={{ width: "30%" }}>Country</th>
-                        <th style={{ width: "40%" }}>Ways to Buy</th>
-                        <th style={{ width: "30%" }}>As of Date</th>
-                      </tr>
-                      <tr className='yellow'>
-                        <th style={{ width: "30%" }} >
-                          <OverlayTrigger
-                            placement="bottom"
-                            delay={{ show: 250, hide: 400 }}
-                            overlay={(props) => renderTooltip(props, appliedFilters.filter1)}
-                          >
-                            <p className={`m-0 ${appliedFilters.filter1.length === 1
-                              ? ''
-                              : appliedFilters.filter1.length === countries.length
-                                ? 'text-all'
-                                : 'text-multiple'
-                              }`}>
-                              {
-                                appliedFilters.filter1.length === 1
-                                  ? appliedFilters.filter1[0]
-                                  : appliedFilters.filter1.length === countries.length
-                                    ? '[ALL]'
-                                    : '[Multiple]'
-                              }
-                            </p>
-                          </OverlayTrigger>
-                        </th>
-                        <th style={{ width: "40%" }}>
-                          <OverlayTrigger
-                            placement="bottom"
-                            delay={{ show: 250, hide: 400 }}
-                            overlay={(props) => renderTooltip(props, appliedFilters.filter3)}
-                          >
-                            <p className={`m-0 ${appliedFilters.filter2.length === 1
-                              ? ''
-                              : appliedFilters.filter2.length === waysToBuy.length
-                                ? 'text-all'
-                                : 'text-multiple'
-                              }`}>
-                              {
-                                appliedFilters.filter3.length === 1
-                                  ? appliedFilters.filter3[0]
-                                  : appliedFilters.filter3.length === waysToBuy.length
-                                    ? '[ALL]'
-                                    : '[Multiple]'
-                              }
-                            </p>
-                          </OverlayTrigger>
-                        </th>
-                        <th style={{ width: "30%" }}>{appliedFilters.filter2}</th>
-                      </tr>
-                      <tr className='blue'>
-                        <th style={{ width: "30%" }}>Country</th>
-                        <th style={{ width: "40%" }}>Ways to Buy</th>
-                        <th style={{ width: "30%" }}>Bags Status</th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
-                <div className="col-7 right-table" ref={rightTableHeadRef}>
-                  {
-                    filteredData && filteredData.filter((i) => {
-                      const itemDate = new Date(i.date);
-                      const filterDate = new Date(appliedFilters.filter2);
-                      return itemDate <= filterDate;
-                    })
-                      .sort((a, b) => new Date(b.date) - new Date(a.date))
-                      .map((i, index, arr) => {
-                        const reverseIndex = arr.length - index;
-                        return (
-                          <div className={`${showDiff ? 'col-6' : 'col-4'}`} key={i.date}>
-                            <table className="table table-bordered">
-                              <thead>
-                                <tr>
-                                  <th style={{ width: "30%" }}>Till Day {reverseIndex} EOD</th>
-                                </tr>
-                                <tr className='yellow'>
-                                  <th style={{ width: "30%" }}>{formatDate(new Date(dateOptions[dateOptions.length - 1]['value']))} - {i.date}</th>
-                                </tr>
-                                <tr className='blue'>
-                                  <th className='right-parent-th'>
-                                    <div className={`right-th ${showDiff ? 'col-2' : 'col-4'}`}>GBI</div>
-                                    {
-                                      showDiff &&
-                                      <div className='right-th col-3'><TbDelta /> (AOS - GBI)</div>
-                                    }
-                                    <div className={`right-th ${showDiff ? 'col-2' : 'col-4'}`}>AOS</div>
-                                    {
-                                      showDiff &&
-                                      <div className='right-th col-3'><TbDelta /> (AOS - FSI)</div>
-                                    }
-                                    <div className={`right-th ${showDiff ? 'col-2' : 'col-4'}`}>FSI</div>
-                                  </th>
-                                </tr>
-                              </thead>
-                            </table>
-                          </div>
-                        )
-                      })
-                  }
-                </div>
-              </div>
-
-              <div className="bottom-table">
-                <div className="table-container py-0">
-                  <div className="col-5 left-parent">
-                    <table className="table table-bordered left-table">
-                      <tbody>
-                        {
-                          filteredData && filteredData.every(item => item.data.length > 1) && (
-                            <>
-                              <div className='gap-div'></div>
-                              <tr>
-                                <td style={{ width: "30%" }}>[ALL]</td>
-                                <td style={{ width: "40%" }}>[ALL]</td>
-                                <td style={{ width: "30%" }} className='td-parent'>
-                                  {
-                                    bagStatuses.map((item) => (
-                                      <div key={item.name} className={`td-div ${item.className}`}>
-                                        {item.name}
-                                      </div>
-                                    ))
-                                  }
-                                </td>
-                              </tr>
-                            </>
-                          )
-                        }
-                        {
-                          filteredData &&
-                          filteredData.find((e) => e.date === appliedFilters.filter2)?.data.map((i, index) => {
-                            return (
-                              <React.Fragment key={index}>
-                                <div className='gap-div'></div>
-                                <tr>
-                                  <td style={{ width: "30%" }}>{i.country}</td>
-                                  <td style={{ width: "30%" }}>{i.ways_to_buy}</td>
-                                  <td style={{ width: "30%" }} className='td-parent'>
-                                    {
-                                      bagStatuses.map((item) => (
-                                        <div key={item.name} className={`td-div ${item.className}`}>
-                                          {item.name}
-                                        </div>
-                                      ))
-                                    }
-                                  </td>
-                                </tr>
-                              </React.Fragment>
-                            )
-                          })
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="col-7 right-table" ref={rightTableBodyRef}>
-                    {
-                      filteredData && filteredData.filter((i) => {
-                        const itemDate = new Date(i.date);
-                        const filterDate = new Date(appliedFilters.filter2);
-                        return itemDate <= filterDate;
-                      })
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .map((i, dateIndex) => {
-                          return (
-                            <div className={`${showDiff ? 'col-6' : 'col-4'}`} key={i.date}>
-                              <table className="table table-bordered">
-                                <tbody>
-                                  {
-                                    filteredData && filteredData.every(item => item.data.length > 1) && (
-                                      <>
-                                        <div className='gap-div'></div>
-                                        <tr>
-                                          {
-                                            totalData[i.date] && Object.keys(totalData[i.date]).map((item, key) => {
-                                              const subKeys = totalData[i.date][item];
-                                              let cellClass = '';
-
-                                              if (item === 'totalBagsCreated' || item === 'totalBagsDeleted' || item === 'totalBagsOrdered') {
-                                                cellClass = 'powder-blue';
-                                              } else if (item === 'openBags') {
-                                                cellClass = 'powder-green';
-                                              }
-
-                                              return (
-                                                <td key={key} className='right-parent-th'>
-                                                  {
-                                                    subKeys && (() => {
-                                                      const keys = Object.keys(subKeys);
-
-                                                      let orderedKeys = [
-                                                        { key: keys[0], className: 'col-4', value: subKeys[keys[0]] },
-                                                        { key: keys[1], className: 'col-4', value: subKeys[keys[1]] },
-                                                        { key: keys[2], className: 'col-4', value: subKeys[keys[2]] },
-                                                      ];
-
-                                                      if (showDiff) {
-                                                        orderedKeys = [
-                                                          { key: keys[0], className: 'col-2', value: subKeys[keys[0]] },
-                                                          { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[0]] },
-                                                          { key: keys[1], className: 'col-2', value: subKeys[keys[1]] },
-                                                          { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[2]] },
-                                                          { key: keys[2], className: 'col-2', value: subKeys[keys[2]] },
-                                                        ];
-                                                      }
-
-                                                      return orderedKeys.map((item, index) => (
-                                                        <div key={index} className={`right-th right-th-body ${item.className} ${cellClass}`}>
-                                                          {item.value}
-                                                        </div>
-                                                      ));
-                                                    })()
-                                                  }
-                                                </td>
-                                              )
-                                            })
-                                          }
-                                        </tr>
-                                      </>
-                                    )
-                                  }
-                                  {
-                                    i.data && i.data.map((e, rowIndex) => {
-                                      return (
-                                        <React.Fragment key={rowIndex}>
-                                          <div className='gap-div'></div>
-                                          <tr>
-                                            {
-                                              Object.keys(e).map((key) => {
-                                                if (['id', 'country', 'ways_to_buy'].includes(key)) {
-                                                  return null;
-                                                }
-
-                                                const subKeys = e[key];
-                                                let cellClass = '';
-
-                                                if (key === 'totalBagsCreated' || key === 'totalBagsDeleted' || key === 'totalBagsOrdered') {
-                                                  cellClass = 'powder-blue';
-                                                } else if (key === 'openBags') {
-                                                  cellClass = 'powder-green';
-                                                }
-
-                                                if (typeof subKeys === 'object' && subKeys !== null) {
-                                                  const keys = Object.keys(subKeys);
-
-                                                  let orderedKeys = keys.map((key, index) => ({
-                                                    key,
-                                                    className: 'col-4',
-                                                    value: subKeys[key],
-                                                  }));
-
-                                                  if (showDiff) {
-                                                    orderedKeys = [
-                                                      { key: keys[0], className: 'col-2', value: subKeys[keys[0]] },
-                                                      { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[0]] }, // aos - gbi
-                                                      { key: keys[1], className: 'col-2', value: subKeys[keys[1]] },
-                                                      { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[2]] }, // aos - fsi
-                                                      { key: keys[2], className: 'col-2', value: subKeys[keys[2]] },
-                                                    ];
-                                                  }
-
-                                                  return (
-                                                    <td key={key} className='right-parent-th'>
-                                                      {orderedKeys.map((item, index) => (
-                                                        <div key={index} className={`right-th right-th-body ${item.className} ${cellClass}`}>
-                                                          {item.value}
-                                                        </div>
-                                                      ))}
-                                                    </td>
-                                                  );
-                                                }
-
-                                                return null;
-                                              })
-                                            }
-
-                                          </tr>
-                                        </React.Fragment>
-                                      )
-                                    })
-                                  }
-                                </tbody>
-                              </table>
-                            </div>
-                          )
-                        })
-                    }
-                  </div>
-                </div>
-              </div>
+              <TopTable appliedFilters={appliedFilters}
+                filteredData={filteredData}
+                showDiff={showDiff}
+                dateOptions={dateOptions}
+                rightTableHeadRef={rightTableHeadRef}
+                renderTooltip={renderTooltip}
+                formatDate={formatDate}
+                countries={countries}
+                waysToBuy={waysToBuy} />
+              <BottomTable filteredData={filteredData}
+                bagStatuses={bagStatuses}
+                appliedFilters={appliedFilters}
+                rightTableBodyRef={rightTableBodyRef}
+                showDiff={showDiff}
+                totalData={totalData} />
             </>
           )
           :
