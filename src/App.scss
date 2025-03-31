@@ -36,9 +36,16 @@ p {
 
 
 .header {
+    display: flex;
+    // justify-content: space-between;
     padding: 15px;
+    align-items: flex-end;
     background-color: #f4f4f4;
     border: 1px solid #e1e1e1;
+
+    .header-section {
+        width: 15%;
+    }
 }
 
 body {
@@ -133,6 +140,9 @@ body {
             .right-th {
                 border-right: 1px solid black !important;
                 padding: 3px 5px !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
 
                 &:last-child {
                     border-right: none !important;
@@ -263,10 +273,33 @@ body {
 }
 
 
-.nothing{
+.nothing {
     height: 75vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+
+.clearbtn {
+    background-color: none;
+    background: none;
+    border: none;
+    outline: none;
+    width: fit-content !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+
+    &.active {
+        background-color: #00438a;
+
+        svg {
+            fill: white;
+        }
+
+        color: white;
+        border-radius:5px;
+    }
 }

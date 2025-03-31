@@ -2,21 +2,26 @@ import React, { useRef, useState, useEffect } from 'react';
 import MultiSelect from './MultiDropdown';
 import { countries, waysToBuy, tableData, formatDate, bagStatuses } from '../data';
 import { Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
+import { FaRegFilePdf } from "react-icons/fa";
+import { TbDelta } from "react-icons/tb";
+import { MdOutlineDifference } from "react-icons/md";
 
 function Table() {
   const [filter1, setFilter1] = useState([]);
   const [filter2, setFilter2] = useState(formatDate(new Date()));
   const [filter3, setFilter3] = useState([]);
-  const [appliedFilters, setAppliedFilters] = useState({
-    filter1: [],
-    filter2: formatDate(new Date()),
-    filter3: []
-  });
   const [dateOptions, setDateOptions] = useState([]);
   const [totalData, setTotalData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const rightTableBodyRef = useRef(null);
   const rightTableHeadRef = useRef(null);
+  const [showDiff, setShowDiff] = useState(false);
+  const [appliedFilters, setAppliedFilters] = useState({
+    filter1: [],
+    filter2: formatDate(new Date()),
+    filter3: []
+  });
 
   const handleApply = () => {
     setAppliedFilters({ filter1, filter2, filter3 });
@@ -163,39 +168,50 @@ function Table() {
 
   return (
     <div className='main'>
-      <div className="row mb-3 d-flex align-items-end header">
-        <div className="col-2">
-          <p>Country</p>
-          <MultiSelect
-            options={countries}
-            selectedValues={filter1}
-            onChange={setFilter1}
-            placeholder="Select Country"
-          />
-        </div>
-        <div className="col-2">
-          <p>Ways to Buy</p>
-          <MultiSelect
-            options={waysToBuy}
-            selectedValues={filter3}
-            onChange={setFilter3}
-            placeholder="Select ways to buy"
-          />
-        </div>
-        <div className="col-2">
-          <p>As of Date</p>
-          <select className="form-select" onChange={(e) => setFilter2(e.target.value)}>
-            {
-              dateOptions && dateOptions.map((i, index) => {
-                return (
-                  <option key={index} value={i.value}>{i.label}</option>
-                )
-              })
-            }
-          </select>
-        </div>
-        <div className="col-2">
+      <div className="mb-3 header">
+        <div className='d-flex column-gap-3 align-items-end w-100'>
+          <div className="header-section">
+            <p>Country</p>
+            <MultiSelect
+              options={countries}
+              selectedValues={filter1}
+              onChange={setFilter1}
+              placeholder="Select Country"
+            />
+          </div>
+          <div className="header-section">
+            <p>Ways to Buy</p>
+            <MultiSelect
+              options={waysToBuy}
+              selectedValues={filter3}
+              onChange={setFilter3}
+              placeholder="Select ways to buy"
+            />
+          </div>
+          <div className="header-section">
+            <p>As of Date</p>
+            <select className="form-select" onChange={(e) => setFilter2(e.target.value)}>
+              {
+                dateOptions && dateOptions.map((i, index) => {
+                  return (
+                    <option key={index} value={i.value}>{i.label}</option>
+                  )
+                })
+              }
+            </select>
+          </div>
           <button className="applybtn" onClick={handleApply}>Apply</button>
+        </div>
+        <div className='d-flex my-2 column-gap-2'>
+          <button className={`clearbtn ${showDiff && 'active'}`} onClick={() => setShowDiff(!showDiff)}>
+            <MdOutlineDifference size={25} color='#00438a' />
+          </button>
+          <button className='clearbtn'>
+            <PiMicrosoftExcelLogoFill size={25} color='#00438a' />
+          </button>
+          <button className='clearbtn'>
+            <FaRegFilePdf size={20} color='#00438a' />
+          </button>
         </div>
       </div>
       {
@@ -277,7 +293,7 @@ function Table() {
                       .map((i, index, arr) => {
                         const reverseIndex = arr.length - index;
                         return (
-                          <div className="col-4" key={i.date}>
+                          <div className={`${showDiff ? 'col-6' : 'col-4'}`} key={i.date}>
                             <table className="table table-bordered">
                               <thead>
                                 <tr>
@@ -288,9 +304,17 @@ function Table() {
                                 </tr>
                                 <tr className='blue'>
                                   <th className='right-parent-th'>
-                                    <div className='right-th col-4'>GBI</div>
-                                    <div className='right-th col-4'>AOS</div>
-                                    <div className='right-th col-4'>FSI</div>
+                                    <div className={`right-th ${showDiff ? 'col-2' : 'col-4'}`}>GBI</div>
+                                    {
+                                      showDiff &&
+                                      <div className='right-th col-3'><TbDelta /> (AOS - GBI)</div>
+                                    }
+                                    <div className={`right-th ${showDiff ? 'col-2' : 'col-4'}`}>AOS</div>
+                                    {
+                                      showDiff &&
+                                      <div className='right-th col-3'><TbDelta /> (AOS - FSI)</div>
+                                    }
+                                    <div className={`right-th ${showDiff ? 'col-2' : 'col-4'}`}>FSI</div>
                                   </th>
                                 </tr>
                               </thead>
@@ -363,7 +387,7 @@ function Table() {
                         .sort((a, b) => new Date(b.date) - new Date(a.date))
                         .map((i, dateIndex) => {
                           return (
-                            <div className="col-4" key={i.date}>
+                            <div className={`${showDiff ? 'col-6' : 'col-4'}`} key={i.date}>
                               <table className="table table-bordered">
                                 <tbody>
                                   {
@@ -384,11 +408,33 @@ function Table() {
 
                                               return (
                                                 <td key={key} className='right-parent-th'>
-                                                  {subKeys && Object.keys(subKeys).map((subKey) => (
-                                                    <div key={subKey} className={`right-th right-th-body col-4 ${cellClass}`}>
-                                                      {subKeys[subKey]}
-                                                    </div>
-                                                  ))}
+                                                  {
+                                                    subKeys && (() => {
+                                                      const keys = Object.keys(subKeys);
+
+                                                      let orderedKeys = [
+                                                        { key: keys[0], className: 'col-4', value: subKeys[keys[0]] },
+                                                        { key: keys[1], className: 'col-4', value: subKeys[keys[1]] },
+                                                        { key: keys[2], className: 'col-4', value: subKeys[keys[2]] },
+                                                      ];
+
+                                                      if (showDiff) {
+                                                        orderedKeys = [
+                                                          { key: keys[0], className: 'col-2', value: subKeys[keys[0]] },
+                                                          { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[0]] },
+                                                          { key: keys[1], className: 'col-2', value: subKeys[keys[1]] },
+                                                          { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[2]] },
+                                                          { key: keys[2], className: 'col-2', value: subKeys[keys[2]] },
+                                                        ];
+                                                      }
+
+                                                      return orderedKeys.map((item, index) => (
+                                                        <div key={index} className={`right-th right-th-body ${item.className} ${cellClass}`}>
+                                                          {item.value}
+                                                        </div>
+                                                      ));
+                                                    })()
+                                                  }
                                                 </td>
                                               )
                                             })
@@ -403,37 +449,55 @@ function Table() {
                                         <React.Fragment key={rowIndex}>
                                           <div className='gap-div'></div>
                                           <tr>
-                                            {Object.keys(e).map((key) => {
-                                              if (['id', 'country', 'ways_to_buy'].includes(key)) {
+                                            {
+                                              Object.keys(e).map((key) => {
+                                                if (['id', 'country', 'ways_to_buy'].includes(key)) {
+                                                  return null;
+                                                }
+
+                                                const subKeys = e[key];
+                                                let cellClass = '';
+
+                                                if (key === 'totalBagsCreated' || key === 'totalBagsDeleted' || key === 'totalBagsOrdered') {
+                                                  cellClass = 'powder-blue';
+                                                } else if (key === 'openBags') {
+                                                  cellClass = 'powder-green';
+                                                }
+
+                                                if (typeof subKeys === 'object' && subKeys !== null) {
+                                                  const keys = Object.keys(subKeys);
+
+                                                  let orderedKeys = keys.map((key, index) => ({
+                                                    key,
+                                                    className: 'col-4',
+                                                    value: subKeys[key],
+                                                  }));
+
+                                                  if (showDiff) {
+                                                    orderedKeys = [
+                                                      { key: keys[0], className: 'col-2', value: subKeys[keys[0]] },
+                                                      { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[0]] }, // aos - gbi
+                                                      { key: keys[1], className: 'col-2', value: subKeys[keys[1]] },
+                                                      { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[2]] }, // aos - fsi
+                                                      { key: keys[2], className: 'col-2', value: subKeys[keys[2]] },
+                                                    ];
+                                                  }
+
+                                                  return (
+                                                    <td key={key} className='right-parent-th'>
+                                                      {orderedKeys.map((item, index) => (
+                                                        <div key={index} className={`right-th right-th-body ${item.className} ${cellClass}`}>
+                                                          {item.value}
+                                                        </div>
+                                                      ))}
+                                                    </td>
+                                                  );
+                                                }
+
                                                 return null;
-                                              }
+                                              })
+                                            }
 
-                                              const subKeys = e[key];
-
-                                              let cellClass = '';
-
-                                              if (key === 'totalBagsCreated' || key === 'totalBagsDeleted' || key === 'totalBagsOrdered') {
-                                                cellClass = 'powder-blue';
-                                              }
-
-                                              else if (key === 'openBags') {
-                                                cellClass = 'powder-green';
-                                              }
-
-
-                                              if (typeof subKeys === 'object' && subKeys !== null) {
-                                                return (
-                                                  <td key={key} className='right-parent-th'>
-                                                    {Object.keys(subKeys).map((subKey) => (
-                                                      <div key={subKey} className={`right-th right-th-body col-4 ${cellClass}`}>
-                                                        {subKeys[subKey]}
-                                                      </div>
-                                                    ))}
-                                                  </td>
-                                                );
-                                              }
-                                              return null;
-                                            })}
                                           </tr>
                                         </React.Fragment>
                                       )
