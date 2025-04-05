@@ -4,7 +4,7 @@ import { MdOutlineDifference } from "react-icons/md";
 import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import { FaRegFilePdf } from "react-icons/fa";
 
-function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3, setFilter2, setShowDiff, dateOptions, handleApply, showDiff, exportToExcel }) {
+function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3, setFilter2, setShowDiff, dateOptions, handleApply, showDiff, exportToExcel, handlePrint }) {
     return (
         <>
             <div className="mb-3 header">
@@ -45,10 +45,10 @@ function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3
                     <button className={`clearbtn ${showDiff && 'active'}`} onClick={() => setShowDiff(!showDiff)}>
                         <MdOutlineDifference size={25} color='#00438a' />
                     </button>
-                    <button className='clearbtn'>
+                    <button className='clearbtn' onClick={() => exportToExcel()}>
                         <PiMicrosoftExcelLogoFill size={25} color='#00438a' />
                     </button>
-                    <button className='clearbtn'>
+                    <button className='clearbtn' onClick={() => handlePrint()}>
                         <FaRegFilePdf size={20} color='#00438a' />
                     </button>
                 </div>

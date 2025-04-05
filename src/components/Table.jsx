@@ -4,6 +4,8 @@ import { Tooltip } from 'react-bootstrap';
 import Header from './Header';
 import BottomTable from './BottomTable';
 import TopTable from './TopTable';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 function Table() {
   const [filter1, setFilter1] = useState([]);
@@ -165,10 +167,223 @@ function Table() {
   };
 
   const exportToExcel = async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Excel Report");
 
+    const dates = [...new Set(filteredData.map(entry => entry.date))]
+      .sort((a, b) => new Date(b) - new Date(a));
+
+    const getFilterValue = (filter, allValues) => {
+      return filter.length === 1
+        ? filter[0]
+        : filter.length === allValues.length
+          ? "[ALL]"
+          : "[Multiple]";
+    };
+
+    const countryValue = getFilterValue(appliedFilters.filter1, countries);
+    const waysToBuyValue = getFilterValue(appliedFilters.filter3, waysToBuy);
+
+    const headerRow1 = ["Country", "Ways to Buy", "As of Date"];
+    dates.forEach((_, index) => {
+      const labelIndex = dates.length - index;
+      headerRow1.push(`Till Day ${labelIndex} EOD`);
+
+      const extraCells = showDiff ? 4 : 2;
+      for (let i = 0; i < extraCells; i++) {
+        headerRow1.push(null);
+      }
+    });
+
+    worksheet.addRow(headerRow1);
+
+    const oldestDate = dates[dates.length - 1];
+
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr);
+      return `${(date.getMonth() + 1).toString().padStart(2, '0')}/` +
+        `${date.getDate().toString().padStart(2, '0')}/` +
+        `${date.getFullYear()}`;
+    };
+
+    const headerRow2 = [countryValue, waysToBuyValue, formatDate(dates[0])];
+
+    dates.forEach(date => {
+      const dateRangeLabel = `${formatDate(oldestDate)} - ${formatDate(date)}`;
+      headerRow2.push(dateRangeLabel);
+      const extraCells = showDiff ? 4 : 2;
+      for (let i = 0; i < extraCells; i++) {
+        headerRow2.push(null);
+      }
+    });
+    worksheet.addRow(headerRow2);
+
+    let colIndexForRow2 = 4;
+    dates.forEach(() => {
+      worksheet.mergeCells(2, colIndexForRow2, 2, colIndexForRow2 + (showDiff ? 4 : 2));
+      colIndexForRow2 += showDiff ? 5 : 3;
+    });
+
+    worksheet.getRow(2).eachCell(cell => {
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+    });
+
+
+    const headerRow3 = ["Country", "Ways to Buy", "Bag Status"];
+    dates.forEach(() => {
+      headerRow3.push("GBI");
+      if (showDiff) headerRow3.push("Δ (AOS - GBI)");
+      headerRow3.push("AOS");
+      if (showDiff) headerRow3.push("Δ (AOS - FSI)");
+      headerRow3.push("FSI");
+    });
+    worksheet.addRow(headerRow3);
+
+
+    const headerStyles = [
+      { color: "000000", bgColor: "FFFFFF" }, 
+      { color: "000000", bgColor: "FFFF99" },
+      { color: "FFFFFF", bgColor: "0070C0" }
+    ];
+
+    for (let i = 0; i < 3; i++) {
+      worksheet.getRow(i + 1).eachCell(cell => {
+        cell.font = { bold: true, color: { argb: headerStyles[i].color } };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: headerStyles[i].bgColor }
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      });
+    }
+
+    let colIndex = 4;
+    dates.forEach(() => {
+      worksheet.mergeCells(1, colIndex, 1, colIndex + (showDiff ? 4 : 2));
+      colIndex += showDiff ? 5 : 3;
+    });
+
+
+    const rowMap = new Map();
+
+    filteredData.forEach(({ date, data }) => {
+      data.forEach(entry => {
+        const key = `${entry.country}||${entry.ways_to_buy}`;
+        if (!rowMap.has(key)) rowMap.set(key, {});
+        const bags = rowMap.get(key);
+        bags[date] = bags[date] || {};
+
+        bagStatuses.forEach(({ key: statusKey }) => {
+          bags[date][statusKey] = entry[statusKey] || { aos: "", fsi: "", gbi: "" };
+        });
+      });
+    });
+
+    if (filteredData.every(item => item.data.length > 1)) {
+      bagStatuses.forEach(({ key: statusKey, name, className }) => {
+        const row = [];
+        row.push(countryValue, waysToBuyValue, name);
+
+        dates.forEach(date => {
+          const statusData = totalData[date]?.[statusKey];
+          const gbi = parseFloat(statusData?.gbi ?? "") || 0;
+          const aos = parseFloat(statusData?.aos ?? "") || 0;
+          const fsi = parseFloat(statusData?.fsi ?? "") || 0;
+
+          row.push(gbi || "");
+          if (showDiff) row.push(aos - gbi || "");
+          row.push(aos || "");
+          if (showDiff) row.push(aos - fsi || "");
+          row.push(fsi || "");
+        });
+        const summaryRow = worksheet.addRow(row);
+
+        summaryRow.eachCell((cell, colNum) => {
+          if (colNum >= 3) {
+            if (className === "powder-blue") {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FF84BFFF" }
+              };
+              cell.font = { bold: true };
+            }
+            if (className === "powder-green") {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFB2FFBF" }
+              };
+              cell.font = { bold: true };
+            }
+          }
+        });
+      });
+    }
+
+    rowMap.forEach((dateData, key) => {
+      const [country, way] = key.split("||");
+
+      bagStatuses.forEach(({ key: statusKey, name, className }, index) => {
+        const row = [];
+        row.push(country, way, name);
+
+        dates.forEach(date => {
+          const statusData = dateData[date]?.[statusKey];
+          const gbi = parseFloat(statusData?.gbi ?? "") || 0;
+          const aos = parseFloat(statusData?.aos ?? "") || 0;
+          const fsi = parseFloat(statusData?.fsi ?? "") || 0;
+
+          row.push(gbi || "");
+          if (showDiff) row.push(aos - gbi || "");
+          row.push(aos || "");
+          if (showDiff) row.push(aos - fsi || "");
+          row.push(fsi || "");
+        });
+
+        const newRow = worksheet.addRow(row);
+
+        newRow.eachCell((cell, colNum) => {
+          if (colNum >= 3) {
+            if (className === "powder-blue") {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FF84BFFF" }
+              };
+              cell.font = { bold: true };
+            }
+            if (className === "powder-green") {
+              cell.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: "FFB2FFBF" }
+              };
+              cell.font = { bold: true };
+            }
+          }
+
+        });
+      });
+    });
+
+    worksheet.columns.forEach((column, index) => {
+      column.width = index < 3 ? 20 : 15;
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    });
+
+    saveAs(blob, "excel_report.xlsx");
   };
-  
-  console.log(filteredData)
+
+  const handlePrint = () => {
+    window.print();
+  };
+
 
   return (
     <div className='main'>
@@ -180,6 +395,7 @@ function Table() {
         setFilter3={setFilter3}
         waysToBuy={waysToBuy}
         showDiff={showDiff}
+        handlePrint={handlePrint}
         exportToExcel={exportToExcel}
         dateOptions={dateOptions}
         handleApply={handleApply}
@@ -199,6 +415,8 @@ function Table() {
                 waysToBuy={waysToBuy} />
               <BottomTable filteredData={filteredData}
                 bagStatuses={bagStatuses}
+                countries={countries}
+                waysToBuy={waysToBuy}
                 appliedFilters={appliedFilters}
                 rightTableBodyRef={rightTableBodyRef}
                 showDiff={showDiff}

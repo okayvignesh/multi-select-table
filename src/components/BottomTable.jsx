@@ -1,6 +1,6 @@
 import React from 'react'
 
-function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBodyRef, showDiff, totalData }) {
+function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBodyRef, showDiff, totalData, countries, waysToBuy }) {
     return (
         <>
             <div className="bottom-table">
@@ -13,8 +13,24 @@ function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBody
                                         <>
                                             <div className='gap-div'></div>
                                             <tr>
-                                                <td style={{ width: "30%" }}>[ALL]</td>
-                                                <td style={{ width: "40%" }}>[ALL]</td>
+                                                <td style={{ width: "30%" }}>
+                                                    {
+                                                appliedFilters.filter1.length === 1
+                                                    ? appliedFilters.filter1[0]
+                                                    : appliedFilters.filter1.length === countries.length
+                                                        ? '[ALL]'
+                                                        : '[Multiple]'
+                                            }
+                                            </td>
+                                                <td style={{ width: "40%" }}>
+                                                    {
+                                                appliedFilters.filter3.length === 1
+                                                    ? appliedFilters.filter3[0]
+                                                    : appliedFilters.filter3.length === waysToBuy.length
+                                                        ? '[ALL]'
+                                                        : '[Multiple]'
+                                            }
+                                            </td>
                                                 <td style={{ width: "30%" }} className='td-parent'>
                                                     {
                                                         bagStatuses.map((item) => (
