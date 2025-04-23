@@ -1,6 +1,7 @@
 import React from 'react'
 
 function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBodyRef, showDiff, totalData, countries, waysToBuy }) {
+    console.log(filteredData)
     return (
         <>
             <div className="bottom-table">
@@ -15,22 +16,22 @@ function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBody
                                             <tr>
                                                 <td style={{ width: "30%" }}>
                                                     {
-                                                appliedFilters.filter1.length === 1
-                                                    ? appliedFilters.filter1[0]
-                                                    : appliedFilters.filter1.length === countries.length
-                                                        ? '[ALL]'
-                                                        : '[Multiple]'
-                                            }
-                                            </td>
+                                                        appliedFilters.filter1.length === 1
+                                                            ? appliedFilters.filter1[0]
+                                                            : appliedFilters.filter1.length === countries.length
+                                                                ? '[ALL]'
+                                                                : '[Multiple]'
+                                                    }
+                                                </td>
                                                 <td style={{ width: "40%" }}>
                                                     {
-                                                appliedFilters.filter3.length === 1
-                                                    ? appliedFilters.filter3[0]
-                                                    : appliedFilters.filter3.length === waysToBuy.length
-                                                        ? '[ALL]'
-                                                        : '[Multiple]'
-                                            }
-                                            </td>
+                                                        appliedFilters.filter3.length === 1
+                                                            ? appliedFilters.filter3[0]
+                                                            : appliedFilters.filter3.length === waysToBuy.length
+                                                                ? '[ALL]'
+                                                                : '[Multiple]'
+                                                    }
+                                                </td>
                                                 <td style={{ width: "30%" }} className='td-parent'>
                                                     {
                                                         bagStatuses.map((item) => (
@@ -55,11 +56,13 @@ function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBody
                                                     <td style={{ width: "30%" }}>{i.ways_to_buy}</td>
                                                     <td style={{ width: "30%" }} className='td-parent'>
                                                         {
-                                                            bagStatuses.map((item) => (
-                                                                <div key={item.name} className={`td-div ${item.className}`}>
-                                                                    {item.name}
-                                                                </div>
-                                                            ))
+                                                            bagStatuses
+                                                                .filter((status) => i[status.key])
+                                                                .map((item) => (
+                                                                    <div key={item.name} className={`td-div ${item.className}`}>
+                                                                        {item.name}
+                                                                    </div>
+                                                                ))
                                                         }
                                                     </td>
                                                 </tr>

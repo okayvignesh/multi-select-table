@@ -1,25 +1,32 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { countries, waysToBuy, tableData, formatDate, bagStatuses } from '../data';
+import { formatDate, bagStatuses } from '../data';
 import { Tooltip } from 'react-bootstrap';
 import Header from './Header';
 import BottomTable from './BottomTable';
 import TopTable from './TopTable';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import Footer from './Footer';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 function Table() {
   const [filter1, setFilter1] = useState([]);
-  const [filter2, setFilter2] = useState(formatDate(new Date()));
+  const [filter2, setFilter2] = useState(null);
   const [filter3, setFilter3] = useState([]);
   const [dateOptions, setDateOptions] = useState([]);
   const [totalData, setTotalData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [tableData, setTableData] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [waysToBuy, setWaysToBuy] = useState([]);
   const rightTableBodyRef = useRef(null);
   const rightTableHeadRef = useRef(null);
   const [showDiff, setShowDiff] = useState(false);
+  const [loading, setLoading] = useState(false)
   const [appliedFilters, setAppliedFilters] = useState({
     filter1: [],
-    filter2: formatDate(new Date()),
+    filter2: null,
     filter3: []
   });
 
@@ -52,70 +59,178 @@ function Table() {
 
       return newDateEntry;
     });
-
     setFilteredData(filtered);
-
     calculateTotals(filtered);
   };
 
+
   useEffect(() => {
-    setFilter1(countries.map((i) => i.label));
-    setFilter3(waysToBuy.map((i) => i.label));
+    setLoading(true);
+    axios.get('https://run.mocky.io/v3/504150cc-b8cf-4e88-99ac-5326d628f8f0')
+      .then(response => extractData(response.data.result))
+      .catch(console.error)
+      .finally(() => setLoading(false));
 
-    setFilteredData(tableData);
-    calculateTotals(tableData);
-
-    setAppliedFilters((prevState) => ({
-      ...prevState,
-      filter1: countries.map((i) => i.label),
-      filter3: waysToBuy.map((i) => i.label)
-    }));
-
-
-    setTimeout(() => {
-      const leftTableContainer = rightTableBodyRef.current;
-      const rightTableContainer = rightTableHeadRef.current;
-
-      if (!leftTableContainer || !rightTableContainer) return;
-
-      const handleLeftScroll = () => {
-        rightTableContainer.scrollLeft = leftTableContainer.scrollLeft;
-      };
-
-      const handleRightScroll = () => {
-        leftTableContainer.scrollLeft = rightTableContainer.scrollLeft;
-      };
-
-      leftTableContainer.addEventListener('scroll', handleLeftScroll);
-      rightTableContainer.addEventListener('scroll', handleRightScroll);
-
-      return () => {
-        leftTableContainer.removeEventListener('scroll', handleLeftScroll);
-        rightTableContainer.removeEventListener('scroll', handleRightScroll);
-      };
-    }, 1000);
+    axios.get('https://run.mocky.io/v3/f58988a9-ba9e-49d0-af4b-02fa58665e10')
+      .then(response => transformBagData(response.data.result))
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    const options = [];
-    const today = new Date();
+    if (countries.length === 0 || waysToBuy.length === 0) return;
 
-    options.push({
-      value: formatDate(today),
-      label: formatDate(today)
+    setFilter1(countries.map((i) => i.label));
+    setFilter3(waysToBuy.map((i) => i.label));
+    setFilter2(dateOptions.reduce((max, curr) =>
+      new Date(curr.value) > new Date(max.value) ? curr : max
+    ).label)
+
+    setAppliedFilters(prev => ({
+      ...prev,
+      filter1: countries.map((i) => i.label),
+      filter2: dateOptions.reduce((max, curr) =>
+        new Date(curr.value) > new Date(max.value) ? curr : max
+      ).label,
+      filter3: waysToBuy.map((i) => i.label),
+    }));
+
+
+    const leftTableContainer = rightTableBodyRef.current;
+    const rightTableContainer = rightTableHeadRef.current;
+
+    if (!leftTableContainer || !rightTableContainer) return;
+
+    const handleLeftScroll = () => {
+      rightTableContainer.scrollLeft = leftTableContainer.scrollLeft;
+    };
+
+    const handleRightScroll = () => {
+      leftTableContainer.scrollLeft = rightTableContainer.scrollLeft;
+    };
+
+    leftTableContainer.addEventListener('scroll', handleLeftScroll);
+    rightTableContainer.addEventListener('scroll', handleRightScroll);
+
+    return () => {
+      leftTableContainer.removeEventListener('scroll', handleLeftScroll);
+      rightTableContainer.removeEventListener('scroll', handleRightScroll);
+    };
+  }, [countries, waysToBuy]);
+
+
+
+  const transformBagData = (data) => {
+    const waysToBuy = new Set();
+    const comboOrder = [];
+    const seenCombos = new Set();
+    const comboStatusMap = {};
+    const bagStatusMap = {
+      "Bags Approved": "bagsApproved",
+      "Bags Declined": "bagsDeclined",
+      "Bags Deleted": "bagsDeleted",
+      "Bags Ordered": "bagsOrdered",
+      "Bags Pending": "bagsPending",
+      "Mass Deleted": "massDeleted",
+      "Open Bags": "openBags",
+      "Payments Failed": "paymentsFailed",
+      "Total Bags Created": "totalBagsCreated",
+      "Total Bags Deleted": "totalBagsDeleted",
+      "Total Bags Ordered": "totalBagsOrdered",
+    };
+
+    const dateGroups = {};
+
+    data.forEach(item => {
+      waysToBuy.add(JSON.stringify({ id: item.Ways_To_Buy, label: item.Ways_To_Buy }));
+
+      const [_, endDate] = item.Day_Range.split(" - ");
+      const formattedDate = endDate.trim();
+      const countryKey = item.Country;
+      const waysKey = item.Ways_To_Buy;
+      const groupKey = `${countryKey}__${waysKey}`;
+      const statusKey = bagStatusMap[item.Bag_Status];
+
+      if (!seenCombos.has(groupKey)) {
+        seenCombos.add(groupKey);
+        comboOrder.push(groupKey);
+      }
+
+      if (!comboStatusMap[groupKey]) comboStatusMap[groupKey] = new Set();
+      if (statusKey) comboStatusMap[groupKey].add(statusKey);
+
+      if (!dateGroups[formattedDate]) {
+        dateGroups[formattedDate] = {};
+      }
+
+      if (!dateGroups[formattedDate][groupKey]) {
+        dateGroups[formattedDate][groupKey] = {
+          id: uuidv4(),
+          country: countryKey,
+          ways_to_buy: waysKey,
+        };
+      }
+
+      if (statusKey) {
+        dateGroups[formattedDate][groupKey][statusKey] = {
+          gbi: item.GBI_Cnt,
+          aos: item.AOS_Cnt,
+          fsi: item.FSI_Cnt,
+        };
+      }
     });
 
-    for (let i = 1; i < 8; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      options.push({
-        value: formatDate(date),
-        label: formatDate(date)
-      });
-    }
+    Object.keys(dateGroups).forEach(date => {
+      const groupData = dateGroups[date];
 
-    setDateOptions(options);
-  }, [filter2]);
+      comboOrder.forEach(combo => {
+        const [country, ways_to_buy] = combo.split("__");
+
+        if (!groupData[combo]) {
+          groupData[combo] = {
+            id: uuidv4(),
+            country,
+            ways_to_buy,
+          };
+        }
+
+        const requiredStatuses = comboStatusMap[combo];
+        requiredStatuses.forEach(status => {
+          if (!groupData[combo][status]) {
+            groupData[combo][status] = {
+              gbi: '-',
+              aos: '-',
+              fsi: '-',
+            };
+          }
+        });
+      });
+    });
+
+    const finalResult = Object.entries(dateGroups).map(([date, groupData]) => ({
+      date,
+      data: comboOrder.map(combo => groupData[combo]),
+    }));
+
+    setTableData(finalResult);
+    setFilteredData(finalResult);
+    calculateTotals(finalResult);
+    setWaysToBuy([...waysToBuy].map(item => JSON.parse(item)));
+  };
+
+
+  const extractData = (data) => {
+    const countries = new Set();
+    const dateOptions = new Set()
+
+    data.forEach((item) => {
+      countries.add(JSON.stringify({ id: item.Country.split(':')[0], label: item.Country.split(':')[1] }));
+      dateOptions.add(JSON.stringify({ value: formatDate(item.As_of_Date), label: formatDate(item.As_of_Date) }));
+    });
+
+    setCountries([...countries].map(item => JSON.parse(item)));
+    setDateOptions([...dateOptions].map(item => JSON.parse(item)));
+  }
 
 
   const calculateTotals = (data) => {
@@ -138,9 +253,15 @@ function Table() {
 
       item.data.forEach(e => {
         Object.keys(totals).forEach(key => {
-          Object.keys(totals[key]).forEach(subKey => {
-            totals[key][subKey] += e[key][subKey];
-          });
+          const current = e?.[key];
+          if (current) {
+            Object.keys(totals[key]).forEach(subKey => {
+              const value = current?.[subKey];
+              if (typeof value === "number") {
+                totals[key][subKey] += value;
+              }
+            });
+          }
         });
       });
 
@@ -149,6 +270,7 @@ function Table() {
 
     setTotalData(newTotalData);
   };
+
 
   const renderTooltip = (props, content) => {
     if (Array.isArray(content) && content.length > 1) {
@@ -169,6 +291,17 @@ function Table() {
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Excel Report");
+
+    const safeValue = (val) =>
+      val === undefined || val === null || val === "" ? "-" : val;
+
+
+    const parseOrDash = (val) => {
+      if (val === "-" || val === undefined || val === null || val === "") return "-";
+      const parsed = parseFloat(val);
+      return isNaN(parsed) ? "-" : parsed;
+    };
+
 
     const dates = [...new Set(filteredData.map(entry => entry.date))]
       .sort((a, b) => new Date(b) - new Date(a));
@@ -241,7 +374,7 @@ function Table() {
 
 
     const headerStyles = [
-      { color: "000000", bgColor: "FFFFFF" }, 
+      { color: "000000", bgColor: "FFFFFF" },
       { color: "000000", bgColor: "FFFF99" },
       { color: "FFFFFF", bgColor: "0070C0" }
     ];
@@ -275,7 +408,7 @@ function Table() {
         bags[date] = bags[date] || {};
 
         bagStatuses.forEach(({ key: statusKey }) => {
-          bags[date][statusKey] = entry[statusKey] || { aos: "", fsi: "", gbi: "" };
+          bags[date][statusKey] = entry[statusKey] || { aos: "-", fsi: "-", gbi: "-" };
         });
       });
     });
@@ -287,15 +420,15 @@ function Table() {
 
         dates.forEach(date => {
           const statusData = totalData[date]?.[statusKey];
-          const gbi = parseFloat(statusData?.gbi ?? "") || 0;
-          const aos = parseFloat(statusData?.aos ?? "") || 0;
-          const fsi = parseFloat(statusData?.fsi ?? "") || 0;
+          const gbi = parseOrDash(statusData?.gbi);
+          const aos = parseOrDash(statusData?.aos);
+          const fsi = parseOrDash(statusData?.fsi);
 
-          row.push(gbi || "");
-          if (showDiff) row.push(aos - gbi || "");
-          row.push(aos || "");
-          if (showDiff) row.push(aos - fsi || "");
-          row.push(fsi || "");
+          row.push(safeValue(gbi));
+          if (showDiff) row.push(safeValue(aos - gbi));
+          row.push(safeValue(aos));
+          if (showDiff) row.push(safeValue(aos - fsi));
+          row.push(safeValue(fsi));
         });
         const summaryRow = worksheet.addRow(row);
 
@@ -322,24 +455,37 @@ function Table() {
       });
     }
 
+
     rowMap.forEach((dateData, key) => {
       const [country, way] = key.split("||");
 
-      bagStatuses.forEach(({ key: statusKey, name, className }, index) => {
+      bagStatuses.forEach(({ key: statusKey, name, className }) => {
+        let hasData = false;
+
+        for (const date of dates) {
+          const s = dateData[date]?.[statusKey];
+          if (s && (s.gbi !== "-" || s.aos !== "-" || s.fsi !== "-")) {
+            hasData = true;
+            break;
+          }
+        }
+
+        if (!hasData) return;
+
         const row = [];
         row.push(country, way, name);
 
         dates.forEach(date => {
           const statusData = dateData[date]?.[statusKey];
-          const gbi = parseFloat(statusData?.gbi ?? "") || 0;
-          const aos = parseFloat(statusData?.aos ?? "") || 0;
-          const fsi = parseFloat(statusData?.fsi ?? "") || 0;
+          const gbi = parseOrDash(statusData?.gbi);
+          const aos = parseOrDash(statusData?.aos);
+          const fsi = parseOrDash(statusData?.fsi);
 
-          row.push(gbi || "");
-          if (showDiff) row.push(aos - gbi || "");
-          row.push(aos || "");
-          if (showDiff) row.push(aos - fsi || "");
-          row.push(fsi || "");
+          row.push(safeValue(gbi));
+          if (showDiff) row.push(safeValue(aos - gbi));
+          row.push(safeValue(aos));
+          if (showDiff) row.push(safeValue(aos - fsi));
+          row.push(safeValue(fsi));
         });
 
         const newRow = worksheet.addRow(row);
@@ -363,9 +509,9 @@ function Table() {
               cell.font = { bold: true };
             }
           }
-
         });
       });
+
     });
 
     worksheet.columns.forEach((column, index) => {
@@ -384,12 +530,12 @@ function Table() {
     window.print();
   };
 
-
   return (
     <div className='main'>
       <Header countries={countries}
         filter1={filter1}
         filter3={filter3}
+        filter2={filter2}
         setFilter1={setFilter1}
         setFilter2={setFilter2}
         setFilter3={setFilter3}
@@ -426,7 +572,7 @@ function Table() {
           :
           <p className='text-center nothing'>Nothing to show</p>
       }
-
+      <Footer />
     </div>
   );
 }

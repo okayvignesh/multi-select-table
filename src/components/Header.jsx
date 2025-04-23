@@ -4,7 +4,7 @@ import { MdOutlineDifference } from "react-icons/md";
 import { PiMicrosoftExcelLogoFill } from "react-icons/pi";
 import { FaRegFilePdf } from "react-icons/fa";
 
-function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3, setFilter2, setShowDiff, dateOptions, handleApply, showDiff, exportToExcel, handlePrint }) {
+function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3, setFilter2, setShowDiff, dateOptions, handleApply, showDiff, exportToExcel, handlePrint, filter2 }) {
     return (
         <>
             <div className="mb-3 header">
@@ -30,6 +30,7 @@ function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3
                     <div className="header-section">
                         <p>As of Date</p>
                         <select className="form-select" onChange={(e) => setFilter2(e.target.value)}>
+                            <option  value={filter2}>{filter2}</option>
                             {
                                 dateOptions && dateOptions.map((i, index) => {
                                     return (

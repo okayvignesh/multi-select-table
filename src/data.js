@@ -87,7 +87,8 @@ export const tableData = Array.from({ length: 8 }, (_, dayOffset) => {
     };
 });
 
-export function formatDate(date) {
+export function formatDate(d) {
+    const date = new Date(d);
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     const year = date.getFullYear();

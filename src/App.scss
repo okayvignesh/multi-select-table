@@ -64,7 +64,7 @@ body {
 }
 
 .bottom-table {
-    height: 70vh;
+    height: 66vh;
     overflow: scroll;
 }
 
@@ -301,5 +301,35 @@ body {
 
         color: white;
         border-radius:5px;
+    }
+}
+
+.footer {
+    background-color: white;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    padding: 3px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    display: flex;
+    justify-content: space-around;
+    font-size: 13px;
+    font-weight: 400;
+
+    .footer-box {
+        p {
+            margin: 0 !important;
+        }
+
+        width: 25%;
+        border-right: 1px solid gray;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        &:last-child {
+            border-right: none;
+        }
     }
 }
