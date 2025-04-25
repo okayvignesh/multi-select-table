@@ -18,7 +18,7 @@ const MultiSelect = ({
             if (selectedValues.length === options.length) {
                 onChange([]);
             } else {
-                onChange(options.map((option) => option.label));
+                onChange(options.map((option) => option.id));
             }
         } else {
             const newSelectedValues = selectedValues.includes(label)
@@ -81,8 +81,8 @@ const MultiSelect = ({
                 {options.map((option) => (
                     <li key={option.id}>
                         <label
-                            className={`dropdown-item ${selectedValues.includes(option.label) ? 'selected' : ''}`}
-                            onClick={(e) => handleSelect(e, option.label)}>
+                            className={`dropdown-item ${selectedValues.includes(option.id) ? 'selected' : ''}`}
+                            onClick={(e) => handleSelect(e, option.id)}>
                             {option.label}
                         </label>
                     </li>

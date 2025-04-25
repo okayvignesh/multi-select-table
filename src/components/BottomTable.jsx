@@ -1,7 +1,6 @@
 import React from 'react'
 
 function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBodyRef, showDiff, totalData, countries, waysToBuy }) {
-    console.log(filteredData)
     return (
         <>
             <div className="bottom-table">
@@ -114,12 +113,19 @@ function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBody
                                                                                                 { key: keys[2], className: 'col-4', value: subKeys[keys[2]] },
                                                                                             ];
 
+
+                                                                                            const safeSubtract = (a, b) => {
+                                                                                                const numA = Number(a);
+                                                                                                const numB = Number(b);
+                                                                                                return isNaN(numA) || isNaN(numB) ? '-' : numB - numA;
+                                                                                            };
+
                                                                                             if (showDiff) {
                                                                                                 orderedKeys = [
                                                                                                     { key: keys[0], className: 'col-2', value: subKeys[keys[0]] },
-                                                                                                    { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[0]] },
+                                                                                                    { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: safeSubtract(subKeys[keys[1]], subKeys[keys[0]]) },
                                                                                                     { key: keys[1], className: 'col-2', value: subKeys[keys[1]] },
-                                                                                                    { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[2]] },
+                                                                                                    { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: safeSubtract(subKeys[keys[1]], subKeys[keys[2]]) },
                                                                                                     { key: keys[2], className: 'col-2', value: subKeys[keys[2]] },
                                                                                                 ];
                                                                                             }
@@ -169,12 +175,19 @@ function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBody
                                                                                         value: subKeys[key],
                                                                                     }));
 
+                                                                                    const safeSubtract = (a, b) => {
+                                                                                        const numA = Number(a);
+                                                                                        const numB = Number(b);
+                                                                                        return isNaN(numA) || isNaN(numB) ? '-' : numB - numA;
+                                                                                    };
+
+
                                                                                     if (showDiff) {
                                                                                         orderedKeys = [
                                                                                             { key: keys[0], className: 'col-2', value: subKeys[keys[0]] },
-                                                                                            { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[0]] }, // aos - gbi
+                                                                                            { key: `${keys[0]} - ${keys[1]}`, className: 'col-3', value: safeSubtract(subKeys[keys[1]], subKeys[keys[0]]) },
                                                                                             { key: keys[1], className: 'col-2', value: subKeys[keys[1]] },
-                                                                                            { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: subKeys[keys[1]] - subKeys[keys[2]] }, // aos - fsi
+                                                                                            { key: `${keys[1]} - ${keys[2]}`, className: 'col-3', value: safeSubtract(subKeys[keys[1]], subKeys[keys[2]]) },
                                                                                             { key: keys[2], className: 'col-2', value: subKeys[keys[2]] },
                                                                                         ];
                                                                                     }

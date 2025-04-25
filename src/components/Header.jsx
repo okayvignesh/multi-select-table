@@ -29,8 +29,7 @@ function Header({ countries, filter1, setFilter1, waysToBuy, filter3, setFilter3
                     </div>
                     <div className="header-section">
                         <p>As of Date</p>
-                        <select className="form-select" onChange={(e) => setFilter2(e.target.value)}>
-                            <option  value={filter2}>{filter2}</option>
+                        <select className="form-select" value={filter2} onChange={(e) => setFilter2(e.target.value)}>
                             {
                                 dateOptions && dateOptions.map((i, index) => {
                                     return (
