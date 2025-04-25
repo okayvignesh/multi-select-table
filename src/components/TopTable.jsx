@@ -22,7 +22,7 @@ function TopTable({ appliedFilters, filteredData, showDiff, dateOptions, rightTa
                                             <OverlayTrigger
                                                 placement="bottom"
                                                 delay={{ show: 250, hide: 400 }}
-                                                overlay={(props) => renderTooltip(props, appliedFilters.filter1)}
+                                                overlay={(props) => renderTooltip(props, appliedFilters.filter1, 'country')}
                                             >
                                                 <p className={`m-0 ${appliedFilters.filter1.length === 1
                                                     ? ''
@@ -44,7 +44,7 @@ function TopTable({ appliedFilters, filteredData, showDiff, dateOptions, rightTa
                                             <OverlayTrigger
                                                 placement="bottom"
                                                 delay={{ show: 250, hide: 400 }}
-                                                overlay={(props) => renderTooltip(props, appliedFilters.filter3)}
+                                                overlay={(props) => renderTooltip(props, appliedFilters.filter3, 'waysToBuy')}
                                             >
                                                 <p className={`m-0 ${appliedFilters?.filter2.length === 1
                                                     ? ''

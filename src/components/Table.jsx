@@ -307,13 +307,24 @@ function Table() {
   };
 
 
-  const renderTooltip = (props, content) => {
+  const renderTooltip = (props, content, type) => {
+    const getLabel = (id) => {
+      if (type === "country") {
+        const match = countries.find(c => c.id === id);
+        return match ? match.label : id;
+      } else if (type === "waysToBuy") {
+        const match = waysToBuy.find(w => w.id === id);
+        return match ? match.label : id;
+      }
+      return id;
+    };
+
     if (Array.isArray(content) && content.length > 1) {
       return (
         <Tooltip id="button-tooltip" {...props}>
           <ul>
             {content.map((item, index) => (
-              <li key={index}>{item}</li>
+              <li key={index}>{getLabel(item)}</li>
             ))}
           </ul>
         </Tooltip>
@@ -322,6 +333,7 @@ function Table() {
       return <></>;
     }
   };
+
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
