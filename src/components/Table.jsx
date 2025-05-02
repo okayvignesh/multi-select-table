@@ -318,7 +318,7 @@ function Table() {
       }
       return id;
     };
-
+  
     if (Array.isArray(content) && content.length > 1) {
       return (
         <Tooltip id="button-tooltip" {...props}>
@@ -329,10 +329,17 @@ function Table() {
           </ul>
         </Tooltip>
       );
+    } else if (typeof content === 'string' && content.trim() !== '') {
+      return (
+        <Tooltip id="button-tooltip" {...props}>
+          {content}
+        </Tooltip>
+      );
     } else {
       return <></>;
     }
   };
+  
 
 
   const exportToExcel = async () => {
@@ -594,7 +601,8 @@ function Table() {
         exportToExcel={exportToExcel}
         dateOptions={dateOptions}
         handleApply={handleApply}
-        setShowDiff={setShowDiff} />
+        setShowDiff={setShowDiff}
+        renderTooltip={renderTooltip} />
       {
         loading ?
           <div className='loader'>
