@@ -34,6 +34,7 @@ function Table() {
 
   const handleApply = () => {
     setAppliedFilters({ filter1, filter2, filter3 });
+    console.log(filter1, filter2, filter3)
     fetchRowData();
   };
 
@@ -46,7 +47,7 @@ function Table() {
     incrementLoading();
 
     // GET REQUEST FOR CHECKING 
-    axios.get('https://run.mocky.io/v3/a4ffccfb-1ef9-4c49-a736-a632f168b407')
+    axios.get('https://run.mocky.io/v3/310c058d-7347-49d1-ac02-654c637ddf53')
       .then(response => transformBagData(response.data.result))
       .catch(console.error)
       .finally(() => decrementLoading());
@@ -83,7 +84,7 @@ function Table() {
   // API CALL FOR GEO DROPDOWN
   const fetchGeoDropdownData = () => {
     incrementLoading();
-    axios.get('https://run.mocky.io/v3/504150cc-b8cf-4e88-99ac-5326d628f8f0')
+    axios.get('https://run.mocky.io/v3/5783006d-14ff-4969-a651-7ef10bb96358')
       .then(response => extractData(response.data.result))
       .catch(console.error)
       .finally(() => decrementLoading());

@@ -21,12 +21,22 @@ const MultiSelect = ({
                 onChange(options.map((option) => option.id));
             }
         } else {
-            const newSelectedValues = selectedValues.includes(label)
-                ? selectedValues.filter((v) => v !== label)
-                : [...selectedValues, label];
+            let newSelectedValues = [];
+
+            if (selectedValues.length === options.length) {
+                newSelectedValues = [label];
+            } else {
+                if (selectedValues.includes(label)) {
+                    newSelectedValues = selectedValues.filter((v) => v !== label);
+                } else {
+                    newSelectedValues = [...selectedValues, label];
+                }
+            }
+
             onChange(newSelectedValues);
         }
     };
+
 
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
@@ -50,6 +60,8 @@ const MultiSelect = ({
         setAllSelected(selectedValues.length === options.length);
     }, [selectedValues, options.length]);
 
+    console.log(selectedValues, options)
+
     return (
         <div className="dropdown" ref={dropdownRef}>
             <button
@@ -64,7 +76,9 @@ const MultiSelect = ({
                         ? 'ALL'
                         : selectedValues.length > 1
                             ? '[Multiple]'
-                            : selectedValues.join(', ')
+                            : selectedValues
+                                .map(id => options.find(option => option.id === id)?.label || id)
+                                .join(', ')
                     : placeholder
                 }
             </button>
@@ -81,12 +95,13 @@ const MultiSelect = ({
                 {options.map((option) => (
                     <li key={option.id}>
                         <label
-                            className={`dropdown-item ${selectedValues.includes(option.id) ? 'selected' : ''}`}
+                            className={`dropdown-item ${!allSelected && selectedValues.includes(option.id) ? 'selected' : ''}`}
                             onClick={(e) => handleSelect(e, option.id)}>
                             {option.label}
                         </label>
                     </li>
                 ))}
+
             </ul>
         </div>
     );

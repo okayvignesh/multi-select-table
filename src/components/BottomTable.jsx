@@ -52,7 +52,26 @@ function BottomTable({ filteredData, bagStatuses, appliedFilters, rightTableBody
                                                 <div className='gap-div'></div>
                                                 <tr>
                                                     <td style={{ width: "30%" }}>{i.country}</td>
-                                                    <td style={{ width: "30%" }}>{i.ways_to_buy}</td>
+                                                    <td style={{ width: "30%" }}>
+                                                        {
+                                                            (() => {
+                                                                const match = i.ways_to_buy.match(/^([^\(]+)(\(.+\))?$/);
+                                                                return match ? (
+                                                                    <>
+                                                                        {match[1].trim()}
+                                                                        {match[2] && (
+                                                                            <>
+                                                                                <br />
+                                                                                <span>{match[2].trim()}</span>
+                                                                            </>
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    i.ways_to_buy
+                                                                );
+                                                            })()
+                                                        }
+                                                    </td>
                                                     <td style={{ width: "30%" }} className='td-parent'>
                                                         {
                                                             bagStatuses

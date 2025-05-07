@@ -22,6 +22,20 @@ p {
     border-color: #007bff;
 }
 
+.form-select option:checked {
+    background-color: #007bff;
+    color: white;
+}
+
+.form-select option:hover {
+    background-color: #f0f8ff;
+}
+
+
+// .form-select option {
+//     font-weight: 500;
+// }
+
 .dropdown-item.selected {
     background-color: #007bff;
     color: white;
